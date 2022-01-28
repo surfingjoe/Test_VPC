@@ -63,8 +63,6 @@ pipeline{
 
             steps {
                 sh "terraform apply -input=false tfplan"
-            }
-            steps {
                 slackSend color: 'good', message: 'Test VPC Deployment successfully Applied'
             }
         }
@@ -77,10 +75,8 @@ pipeline{
         steps {
             sh 'terraform init -input=false'
             sh "terraform destroy --auto-approve"
+            slackSend color: 'good', message: 'Test VPC Deployment Destroyed'
         }
-        steps {
-                slackSend color: 'good', message: 'Test VPC Deployment Destroyed'
-            }
     }
 
   }
