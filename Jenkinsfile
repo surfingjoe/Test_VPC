@@ -62,7 +62,7 @@ pipeline{
             }
 
             steps {
-                sh "terraform apply" -input=false tfplan"
+                sh "terraform apply -input=false tfplan"
             }
         }
 
@@ -73,7 +73,7 @@ pipeline{
 
         steps {
             sh 'terraform init -input=false'
-            sh "terraform destroy" --auto-approve"
+            sh "terraform destroy --auto-approve"
         }
     }
 
