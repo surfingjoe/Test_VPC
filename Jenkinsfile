@@ -80,6 +80,7 @@ pipeline{
             sh "terraform destroy --auto-approve"
             slackSend color: 'good', message: 'Test VPC Deployment Destroyed'
 
+            }
         }
     }
 }
