@@ -98,7 +98,7 @@ post{
         slackSend color: 'danger', message: "*Build failed*  - Job ${env.JOB_NAME} Build # ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
         }
     aborted {
-            BUILD_USER = getBuildUser()
+            script {BUILD_USER = getBuildUser()}
             slackSend color: "#FFC300", message: "*ABORTED:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} by ${BUILD_USER}\n More info at: (<${env.BUILD_URL}|Open>)"
     }
 }
