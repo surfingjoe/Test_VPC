@@ -1,3 +1,5 @@
+import hudson.tasks.test.AbstractTestResultAction
+
 pipeline{
     agent {label 'build_slave1'}
     tools {
@@ -75,12 +77,48 @@ pipeline{
                 equals expected: true, actual: params.destroy
             }
 
-        steps {
-            sh 'terraform init -input=false'
-            sh "terraform destroy --auto-approve"
-            slackSend color: 'good', message: 'Test VPC Deployment Destroyed'
+            steps {
+                sh 'terraform init -input=false'
+                sh "terraform destroy --auto-approve"
+                slackSend color: 'good', message: 'Test VPC Deployment Destroyed'
 
+                }
             }
         }
+    post{
+        success {
+            script {
+                statusComment = "[${env.JOB_NAME}] <${env.BUILD_URL}|#${env.BUILD_NUMBER}> completed succesfully for ${env.GIT_BRANCH} :tada:"
+                slackSend color: 'good', message: 'VPC for Test Environment'
+            }
+        }
+        failure {
+            script {
+                statusComment = getTestResultsMessage()
+                slackSend color: 'danger', message: 'Build failure'
+            }
+        }
+        aborted {
+            script {
+                statusComment = "[${env.JOB_NAME}] <${env.BUILD_URL}|#${env.BUILD_NUMBER}> for ${env.GIT_BRANCH} was aborted by ${getBuildUser()}"
+                slackSend color: 'danger', message: 'Build Aborted'
+
+        }
     }
+}
+
+String getTestResultsMessage() {
+    AbstractTestResultAction testResultAction = currentBuild.rawBuild.getAction(AbstractTestResultAction.class)
+    if (testResultAction != null) {
+        def total = testResultAction.totalCount
+        def failed = testResultAction.failCount
+        def skipped = testResultAction.skipCount
+        return "[${env.JOB_NAME}] <${env.BUILD_URL}|#${env.BUILD_NUMBER}> had test failures for ${env.GIT_BRANCH}.\n  Total: ${total}, Failed: ${failed}, Skipped: ${skipped}"
+    } else {
+        return "[${env.JOB_NAME}] <${env.BUILD_URL}|#${env.BUILD_NUMBER}> failed for ${env.GIT_BRANCH}"
+    }
+}
+
+String getBuildUser() {
+    return currentBuild.rawBuild.getCause(Cause.UserIdCause).getUserId()
 }
