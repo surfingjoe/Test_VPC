@@ -19,72 +19,73 @@ pipeline{
     }
     
     stages{
-        stage('Git Checkout'){
-           steps{
-               git branch: 'master', credentialsId: 'Github', url: 'https://github.com/surfingjoe/test_vpc'
-           
-           }
-        }
-        stage('Terraform Init'){
-            when {
-                not {
+            stage('Git Checkout'){
+                steps{
+                    git branch: 'master', credentialsId: 'Github', url: 'https://github.com/surfingjoe/test_vpc'
+                
+                    }
+            }
+            stage('Terraform Init'){
+                when {
+                    not {
+                        equals expected: true, actual: params.destroy
+                    }
+                }
+                steps{
+                    sh label: '', script: 'terraform init'
+                    // sh 'terraform workspace select ${environment} || terraform workspace new ${environment}'
+
+                    sh "terraform plan -input=false -out tfplan "
+                    sh 'terraform show -no-color tfplan > tfplan.txt'
+
+                }
+            }
+            stage('Approval') {
+                when {
+                    not {
+                        equals expected: true, actual: params.autoApprove
+                    }
+                    not {
+                            equals expected: true, actual: params.destroy
+                        }
+                }
+
+                steps {
+                    script {
+                            def plan = readFile 'tfplan.txt'
+                            input message: "Do you want to apply the plan?",
+                            parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+                    }
+                }
+            }
+            stage('Apply') {
+                when {
+                    not {
+                        equals expected: true, actual: params.destroy
+                    }
+                }
+
+                steps {
+                    sh "terraform apply -input=false tfplan"
+                    slackSend color: 'good', message: 'Test VPC Deployment successfully Applied'
+
+                }
+            }
+
+            stage('Destroy') {
+                when {
                     equals expected: true, actual: params.destroy
                 }
-            }
-            steps{
-                sh label: '', script: 'terraform init'
-                // sh 'terraform workspace select ${environment} || terraform workspace new ${environment}'
 
-                sh "terraform plan -input=false -out tfplan "
-                sh 'terraform show -no-color tfplan > tfplan.txt'
+                steps {
+                    sh 'terraform init -input=false'
+                    sh "terraform destroy --auto-approve"
+                    slackSend color: 'good', message: 'Test VPC Deployment Destroyed'
 
-            }
-        }
-        stage('Approval') {
-           when {
-               not {
-                   equals expected: true, actual: params.autoApprove
-               }
-               not {
-                    equals expected: true, actual: params.destroy
-                }
-           }
-
-            steps {
-               script {
-                    def plan = readFile 'tfplan.txt'
-                    input message: "Do you want to apply the plan?",
-                    parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
-               }
-           }
-        }
-         stage('Apply') {
-            when {
-                not {
-                    equals expected: true, actual: params.destroy
+                    }
                 }
             }
 
-            steps {
-                sh "terraform apply -input=false tfplan"
-                slackSend color: 'good', message: 'Test VPC Deployment successfully Applied'
-
-            }
-        }
-
-        stage('Destroy') {
-            when {
-                equals expected: true, actual: params.destroy
-            }
-
-            steps {
-                sh 'terraform init -input=false'
-                sh "terraform destroy --auto-approve"
-                slackSend color: 'good', message: 'Test VPC Deployment Destroyed'
-
-                }
-            }
-        }
     post{
         success {
             script {
