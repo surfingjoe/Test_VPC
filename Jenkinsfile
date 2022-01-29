@@ -85,7 +85,7 @@ pipeline{
                     }
                 }
             }
-}
+
     post{
         success {
             script {
@@ -104,10 +104,10 @@ pipeline{
                 statusComment = "[${env.JOB_NAME}] <${env.BUILD_URL}|#${env.BUILD_NUMBER}> for ${env.GIT_BRANCH} was aborted by ${getBuildUser()}"
                 slackSend color: 'danger', message: 'Build Aborted'
 
+                }
+            }
         }
-    }
 }
-
 String getTestResultsMessage() {
     AbstractTestResultAction testResultAction = currentBuild.rawBuild.getAction(AbstractTestResultAction.class)
     if (testResultAction != null) {
