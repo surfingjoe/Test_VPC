@@ -91,7 +91,7 @@ post{
         slackSend color: 'good', message: 'Test environment - VPC - Success'
         }
     failure {
-        slackSend color: 'danger', message: "Build failed  - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+        slackSend color: 'danger', message: "*Build failed*  - ${env.JOB_NAME} Build # ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
         }
     aborted {
          slackSend color: "#FFC300", message: '*ABORTED:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} by ${env.USER_ID}\n More info at: ${env.BUILD_URL}'
