@@ -1,5 +1,9 @@
 import hudson.tasks.test.AbstractTestResultAction
 
+def getBuildUser() {
+    return currentBuild.rawBuild.getCause(Cause.UserIdCause).getUserId()
+}
+
 pipeline{
     agent {label 'build_slave1'}
     tools {
