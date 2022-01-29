@@ -85,7 +85,7 @@ pipeline{
                     }
                 }
             }
-}
+
 post{
     success {
         script {
@@ -107,7 +107,7 @@ post{
             }
         }
     }
-
+}
 String getTestResultsMessage() {
     AbstractTestResultAction testResultAction = currentBuild.rawBuild.getAction(AbstractTestResultAction.class)
     if (testResultAction != null) {
