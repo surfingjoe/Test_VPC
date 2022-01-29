@@ -85,29 +85,29 @@ pipeline{
                     }
                 }
             }
-
-    post{
-        success {
-            script {
-                statusComment = "[${env.JOB_NAME}] <${env.BUILD_URL}|#${env.BUILD_NUMBER}> completed succesfully for ${env.GIT_BRANCH} :tada:"
-                slackSend color: 'good', message: 'VPC for Test Environment'
-            }
-        }
-        failure {
-            script {
-                statusComment = getTestResultsMessage()
-                slackSend color: 'danger', message: 'Build failure'
-            }
-        }
-        aborted {
-            script {
-                statusComment = "[${env.JOB_NAME}] <${env.BUILD_URL}|#${env.BUILD_NUMBER}> for ${env.GIT_BRANCH} was aborted by ${getBuildUser()}"
-                slackSend color: 'danger', message: 'Build Aborted'
-
-                }
-            }
-        }
 }
+post{
+    success {
+        script {
+            statusComment = "[${env.JOB_NAME}] <${env.BUILD_URL}|#${env.BUILD_NUMBER}> completed succesfully for ${env.GIT_BRANCH} :tada:"
+            slackSend color: 'good', message: 'VPC for Test Environment'
+        }
+    }
+    failure {
+        script {
+            statusComment = getTestResultsMessage()
+            slackSend color: 'danger', message: 'Build failure'
+        }
+    }
+    aborted {
+        script {
+            statusComment = "[${env.JOB_NAME}] <${env.BUILD_URL}|#${env.BUILD_NUMBER}> for ${env.GIT_BRANCH} was aborted by ${getBuildUser()}"
+            slackSend color: 'danger', message: 'Build Aborted'
+
+            }
+        }
+    }
+
 String getTestResultsMessage() {
     AbstractTestResultAction testResultAction = currentBuild.rawBuild.getAction(AbstractTestResultAction.class)
     if (testResultAction != null) {

@@ -25,7 +25,7 @@ module "vpc" {
   name = "${var.environment}-vpc"
   cidr                  = var.vpc_cidr_block
   azs                   = data.aws_availability_zones.available.names
-  private_subnets       = Test-slice(var.private_subnet_cidr_blocks, 0, 2)
+  private_subnets       = slice(var.private_subnet_cidr_blocks, 0, 2)
   public_subnets        = slice(var.public_subnet_cidr_blocks, 0, 2)
   #intra_subnets         = slice(var.intra_subnet_cidr_blocks, 0, 2)
   #database_subnets      = slice(var.database_subnet_cidr_blocks, 0, 2)
